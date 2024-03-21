@@ -37,8 +37,8 @@ void qs(vector<int> &arr , int l , int h )
 }
 int main()
 {
-vector<int> arr = {12,11,23,45,65,35,2};
-qs(arr, 0 , 6);
+vector<int> arr = {20,10,49,27,40,15,29,35,17};
+qs(arr, 0 , arr.size()-1);
 for(auto x :arr )
 {
     cout<<x<<",";
