@@ -70,6 +70,7 @@ describe('page', () => {
     expect(typeof ctx.rect).toBe('function')
     expect(typeof ctx.line).toBe('function')
     expect(typeof ctx.image).toBe('function')
+    expect(typeof ctx.link).toBe('function')
   })
 })
 
@@ -261,6 +262,95 @@ describe('line', () => {
     const bytes = doc.build()
     const str = new TextDecoder().decode(bytes)
     expect(str).toContain('1.00 w')
+  })
+})
+
+describe('link', () => {
+  test('creates link annotation', () => {
+    const doc = pdf()
+    doc.page((ctx) => {
+      ctx.link('https://example.com', 50, 700, 100, 20)
+    })
+    const bytes = doc.build()
+    const str = new TextDecoder().decode(bytes)
+    expect(str).toContain('/Type /Annot')
+    expect(str).toContain('/Subtype /Link')
+  })
+
+  test('sets URI action', () => {
+    const doc = pdf()
+    doc.page((ctx) => {
+      ctx.link('https://example.com', 50, 700, 100, 20)
+    })
+    const bytes = doc.build()
+    const str = new TextDecoder().decode(bytes)
+    expect(str).toContain('/S /URI')
+    expect(str).toContain('/URI (https://example.com)')
+  })
+
+  test('sets link rect', () => {
+    const doc = pdf()
+    doc.page((ctx) => {
+      ctx.link('https://example.com', 50, 700, 100, 20)
+    })
+    const bytes = doc.build()
+    const str = new TextDecoder().decode(bytes)
+    expect(str).toContain('/Rect [50 700 150 720]')
+  })
+
+  test('has invisible border by default', () => {
+    const doc = pdf()
+    doc.page((ctx) => {
+      ctx.link('https://example.com', 50, 700, 100, 20)
+    })
+    const bytes = doc.build()
+    const str = new TextDecoder().decode(bytes)
+    expect(str).toContain('/Border [0 0 0]')
+  })
+
+  test('draws underline when specified', () => {
+    const doc = pdf()
+    doc.page((ctx) => {
+      ctx.link('https://example.com', 50, 700, 100, 20, { underline: '#0000ff' })
+    })
+    const bytes = doc.build()
+    const str = new TextDecoder().decode(bytes)
+    expect(str).toContain('0.000 0.000 1.000 RG')
+    expect(str).toContain('50.00 702.00 m')
+    expect(str).toContain('150.00 702.00 l')
+    expect(str).toContain('S')
+  })
+
+  test('no underline without option', () => {
+    const doc = pdf()
+    doc.page((ctx) => {
+      ctx.link('https://example.com', 50, 700, 100, 20)
+    })
+    const bytes = doc.build()
+    const str = new TextDecoder().decode(bytes)
+    expect(str).not.toContain('50.00 702.00 m')
+  })
+
+  test('adds Annots to page', () => {
+    const doc = pdf()
+    doc.page((ctx) => {
+      ctx.link('https://example.com', 50, 700, 100, 20)
+    })
+    const bytes = doc.build()
+    const str = new TextDecoder().decode(bytes)
+    expect(str).toContain('/Annots')
+  })
+
+  test('multiple links on same page', () => {
+    const doc = pdf()
+    doc.page((ctx) => {
+      ctx.link('https://example.com', 50, 700, 100, 20)
+      ctx.link('https://github.com', 50, 650, 100, 20)
+    })
+    const bytes = doc.build()
+    const str = new TextDecoder().decode(bytes)
+    expect(str).toContain('/URI (https://example.com)')
+    expect(str).toContain('/URI (https://github.com)')
   })
 })
 

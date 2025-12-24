@@ -1,7 +1,3 @@
-// tinypdf — Minimal PDF creation library
-// <400 LOC, zero dependencies, makes real PDFs
-
-// Helvetica widths, ASCII 32-126, units per 1000
 const WIDTHS: number[] = [
   278, 278, 355, 556, 556, 889, 667, 191, 333, 333, 389, 584, 278, 333, 278, 278,
   556, 556, 556, 556, 556, 556, 556, 556, 556, 556, 278, 278, 584, 584, 584, 556,
@@ -17,11 +13,16 @@ export interface TextOptions {
   color?: string
 }
 
+export interface LinkOptions {
+  underline?: string
+}
+
 export interface PageContext {
   text(str: string, x: number, y: number, size: number, opts?: TextOptions): void
   rect(x: number, y: number, w: number, h: number, fill: string): void
   line(x1: number, y1: number, x2: number, y2: number, stroke: string, lineWidth?: number): void
   image(jpegBytes: Uint8Array, x: number, y: number, w: number, h: number): void
+  link(url: string, x: number, y: number, w: number, h: number, opts?: LinkOptions): void
 }
 
 export interface PDFBuilder {
@@ -39,12 +40,6 @@ interface PDFObject {
   stream: Uint8Array | null
 }
 
-/**
- * Measure text width in points
- * @param str - Text to measure
- * @param size - Font size in points
- * @returns Width in points
- */
 export function measureText(str: string, size: number): number {
   let width = 0
   for (let i = 0; i < str.length; i++) {
@@ -55,11 +50,6 @@ export function measureText(str: string, size: number): number {
   return (width * size) / 1000
 }
 
-/**
- * Parse hex color to RGB floats
- * @param hex - Hex color string (#rgb or #rrggbb)
- * @returns RGB values 0-1 or null
- */
 function parseColor(hex: string | undefined): number[] | null {
   if (!hex || hex === 'none') return null
   hex = hex.replace('#', '')
@@ -72,9 +62,6 @@ function parseColor(hex: string | undefined): number[] | null {
   return [r, g, b]
 }
 
-/**
- * Escape string for PDF
- */
 function pdfString(str: string): string {
   return '(' + str
     .replace(/\\/g, '\\\\')
@@ -84,9 +71,6 @@ function pdfString(str: string): string {
     .replace(/\n/g, '\\n') + ')'
 }
 
-/**
- * Serialize value to PDF format
- */
 function serialize(val: PDFValue): string {
   if (val === null || val === undefined) return 'null'
   if (typeof val === 'boolean') return val ? 'true' : 'false'
@@ -107,16 +91,11 @@ function serialize(val: PDFValue): string {
   return String(val)
 }
 
-/** PDF object reference */
 class Ref {
   id: number
   constructor(id: number) { this.id = id }
 }
 
-/**
- * Create a new PDF document
- * @returns PDF builder
- */
 export function pdf(): PDFBuilder {
   const objects: PDFObject[] = []
   const pages: Ref[] = []
@@ -146,6 +125,7 @@ export function pdf(): PDFBuilder {
 
     const ops: string[] = []
     const images: { name: string; ref: Ref }[] = []
+    const links: { url: string; rect: number[] }[] = []
     let imageCount = 0
 
     const ctx: PageContext = {
@@ -217,6 +197,20 @@ export function pdf(): PDFBuilder {
         ops.push(`${w.toFixed(2)} 0 0 ${h.toFixed(2)} ${x.toFixed(2)} ${y.toFixed(2)} cm`)
         ops.push(`${imgName} Do`)
         ops.push('Q')
+      },
+
+      link(url: string, x: number, y: number, w: number, h: number, opts: LinkOptions = {}) {
+        links.push({ url, rect: [x, y, x + w, y + h] })
+        if (opts.underline) {
+          const rgb = parseColor(opts.underline)
+          if (rgb) {
+            ops.push(`0.75 w`)
+            ops.push(`${rgb[0].toFixed(3)} ${rgb[1].toFixed(3)} ${rgb[2].toFixed(3)} RG`)
+            ops.push(`${x.toFixed(2)} ${(y + 2).toFixed(2)} m`)
+            ops.push(`${(x + w).toFixed(2)} ${(y + 2).toFixed(2)} l`)
+            ops.push('S')
+          }
+        }
       }
     }
 
@@ -231,6 +225,14 @@ export function pdf(): PDFBuilder {
       xobjects[img.name.slice(1)] = img.ref
     }
 
+    const annots: Ref[] = links.map(lnk => addObject({
+      Type: '/Annot',
+      Subtype: '/Link',
+      Rect: lnk.rect,
+      Border: [0, 0, 0],
+      A: { Type: '/Action', S: '/URI', URI: lnk.url }
+    }))
+
     const pageRef = addObject({
       Type: '/Page',
       Parent: null,
@@ -239,7 +241,8 @@ export function pdf(): PDFBuilder {
       Resources: {
         Font: { F1: null },
         XObject: Object.keys(xobjects).length > 0 ? xobjects : undefined
-      }
+      },
+      Annots: annots.length > 0 ? annots : undefined
     })
 
     pages.push(pageRef)
@@ -320,10 +323,6 @@ export function pdf(): PDFBuilder {
   return { page, build, measureText }
 }
 
-/**
- * Convert markdown to PDF
- * Supports: # headers, - lists, 1. numbered lists, --- rules, paragraphs with word wrap
- */
 export function markdown(md: string, opts: { width?: number; height?: number; margin?: number } = {}): Uint8Array {
   const W = opts.width ?? 612, H = opts.height ?? 792, M = opts.margin ?? 72
   const doc = pdf(), textW = W - M * 2, bodySize = 11, lineH = bodySize * 1.5

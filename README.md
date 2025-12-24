@@ -36,6 +36,7 @@ Invoices, receipts, reports, shipping labels, tickets, certificates, contracts, 
 | **Text** | Helvetica, any size, hex colors, align left/center/right |
 | **Shapes** | Rectangles and lines |
 | **Images** | JPEG (photos, logos, signatures) |
+| **Links** | Clickable URLs with optional underline |
 | **Pages** | Multiple pages, custom sizes |
 | **Markdown** | Convert markdown to PDF with headers, lists, rules |
 
@@ -72,6 +73,19 @@ import { readFileSync } from 'fs'
 doc.page((ctx) => {
   const logo = new Uint8Array(readFileSync('logo.jpg'))
   ctx.image(logo, 50, 700, 100, 50)
+})
+```
+
+### Add links
+
+```typescript
+import { pdf, measureText } from 'tinypdf'
+
+doc.page((ctx) => {
+  const text = 'Visit Example.com'
+  const y = 700
+  ctx.text(text, 50, y, 14, { color: '#0066cc' })
+  ctx.link('https://example.com', 50, y - 4, measureText(text, 14), 18, { underline: '#0066cc' })
 })
 ```
 
@@ -122,6 +136,7 @@ ctx.text(str, x, y, size, options?)        // options: { color, align, width }
 ctx.rect(x, y, w, h, fill)                 // filled rectangle
 ctx.line(x1, y1, x2, y2, stroke, width?)   // line
 ctx.image(jpegBytes, x, y, w, h)           // JPEG image
+ctx.link(url, x, y, w, h, options?)        // options: { underline }
 
 measureText(str, size)                     // text width in points
 markdown(str, options?)                    // options: { width, height, margin }
